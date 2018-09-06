@@ -31,6 +31,7 @@ import com.arcsoft.facerecognition.AFR_FSDKVersion;
 import com.arcsoft.facetracking.AFT_FSDKEngine;
 import com.arcsoft.facetracking.AFT_FSDKError;
 import com.arcsoft.facetracking.AFT_FSDKFace;
+import com.arcsoft.facetracking.AFT_FSDKVersion;
 import com.arcsoft.genderestimation.ASGE_FSDKFace;
 import com.arcsoft.genderestimation.ASGE_FSDKGender;
 import com.guo.android_extend.java.AbsLoop;
@@ -61,12 +62,11 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
     private CameraGLSurfaceView mGLSurfaceView;
     private Camera mCamera;
 
-    //	AFT_FSDKVersion version = new AFT_FSDKVersion();
-//	AFT_FSDKEngine engine = new AFT_FSDKEngine();
-//
+    AFT_FSDKVersion version = new AFT_FSDKVersion();
+    AFT_FSDKEngine engine = new AFT_FSDKEngine();
     byte[] mImageNV21 = null;
-    //	FRAbsLoop mFRAbsLoop = null;
-	AFT_FSDKFace mAFT_FSDKFace = null;
+    FRAbsLoop mFRAbsLoop = null;
+    AFT_FSDKFace mAFT_FSDKFace = null;
 
     AgeAndGenderAbsLoop mAgeAndGenderAbsLoop;
 
@@ -85,126 +85,125 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
     private int mCameraId;
     private boolean isUseFront;
 
-//	class FRAbsLoop extends AbsLoop {
-//
-//		AFR_FSDKVersion version = new AFR_FSDKVersion();
-//		AFR_FSDKEngine engine = new AFR_FSDKEngine();
-//		AFR_FSDKFace ft_result = new AFR_FSDKFace();
-//		List<FaceDB.FaceRegist> mResgist = ((MyApplication)DetecterActivity.this.
-//				getApplicationContext()).mFaceDB.mRegister;
-//
-//		@Override
-//		public void setup() {
-//			AFR_FSDKError error = engine.AFR_FSDK_InitialEngine(FaceDB.APP_ID, FaceDB.FR_KEY);
-//			Log.d(TAG, "AFR_FSDK_InitialEngine = " + error.getCode());
-//			error = engine.AFR_FSDK_GetVersion(version);
-//			Log.d(TAG, "FR=" + version.toString() + "," + error.getCode()); //(210, 178 - 478, 446), degree = 1　780, 2208 - 1942, 3370
-//		}
-//
-//		@Override
-//		public void loop() {
-//			if (mImageNV21 != null) {
-//				AFR_FSDKError error = engine.AFR_FSDK_ExtractFRFeature(mImageNV21, mWidth, mHeight, AFR_FSDKEngine.CP_PAF_NV21, mAFT_FSDKFace.getRect(), mAFT_FSDKFace.getDegree(), ft_result);
-//				Log.d(TAG, "Face=" + ft_result.getFeatureData()[0] + "," + ft_result.getFeatureData()[1] + "," + ft_result.getFeatureData()[2] + "," + error.getCode());
-//				AFR_FSDKMatching score = new AFR_FSDKMatching();
-//				float max = 0.0f;
-//				String name = null;
-//				for (FaceDB.FaceRegist fr : mResgist) {
-//					for (AFR_FSDKFace face : fr.mFaceList) {
-//						error = engine.AFR_FSDK_FacePairMatching(ft_result, face, score);
-//						Log.d(TAG,  "Score:" + score.getScore() + ", AFR_FSDK_FacePairMatching=" + error.getCode());
-//						if (max < score.getScore()) {
-//							max = score.getScore();
-//							name = fr.mName;
-//						}
-//					}
-//				}
-//
-//				//crop
-//				byte[] data = mImageNV21;
-//				YuvImage yuv = new YuvImage(data, ImageFormat.NV21, mWidth, mHeight, null);
-//				ExtByteArrayOutputStream ops = new ExtByteArrayOutputStream();
-//				yuv.compressToJpeg(mAFT_FSDKFace.getRect(), 80, ops);
-//				final Bitmap bmp = BitmapFactory.decodeByteArray(ops.getByteArray(), 0, ops.getByteArray().length);
-//				try {
-//					ops.close();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//
-//				if (max > 0.6f) {
-//					//fr success.
-//					final float max_score = max;
-//					Log.d(TAG, "fit Score:" + max + ", NAME:" + name);
-//					final String mNameShow = name;
-//					mHandler.removeCallbacks(hide);
-//					mHandler.post(new Runnable() {
-//						@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-//						@Override
-//						public void run() {
-//
-//							mTextView.setAlpha(1.0f);
-//							mTextView.setText(mNameShow);
-//							mTextView.setTextColor(Color.RED);
-//							mTextView1.setVisibility(View.VISIBLE);
-//							mTextView1.setText("置信度：" + (float)((int)(max_score * 1000)) / 1000.0);
-//							mTextView1.setTextColor(Color.RED);
-//
-//
-////							int orientation = setCameraDisplayOrientation(DetecterActivity.this, mCameraId, mCamera);
-//							int orientation = setCameraDisplayOrientation(DetecterActivity.this, 1, mCamera);
-//
-//
-//
-//							Log.d("zsn","orientation=="+orientation);
-//							if (DetecterActivity.this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-//								//竖屏
-//								mImageView.setRotation( orientation+180);
-//							} else {
-//								//横屏
-//								mImageView.setRotation(orientation);
-//							}
-//							//mImageView.setRotation(-90);
-//							mImageView.setImageAlpha(255);
-//							mImageView.setImageBitmap(bmp);
-//						}
-//					});
-//				} else {
-//					final String mNameShow = "未识别";
-//					DetecterActivity.this.runOnUiThread(new Runnable() {
-//						@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-//						@Override
-//						public void run() {
-//							mTextView.setAlpha(1.0f);
-//							mTextView1.setVisibility(View.INVISIBLE);
-//							mTextView.setText(mNameShow);
-//							mTextView.setTextColor(Color.RED);
-//							mImageView.setImageAlpha(255);
-//							int orientation = setCameraDisplayOrientation(DetecterActivity.this, 1, mCamera);
-//							Log.d("zsn","orientation=="+orientation);
-//							if (DetecterActivity.this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-//								//竖屏
-//								mImageView.setRotation( orientation+180);
-//							} else {
-//								//横屏
-//								mImageView.setRotation(orientation);
-//							}
-//							//mImageView.setRotation(-90);
-//							mImageView.setImageBitmap(bmp);
-//						}
-//					});
-//				}
-//				mImageNV21 = null;
-//			}
-//
-//		}
-//
-//		@Override
-//		public void over() {
-//			AFR_FSDKError error = engine.AFR_FSDK_UninitialEngine();
-//			Log.d(TAG, "AFR_FSDK_UninitialEngine : " + error.getCode());
-//		}
-//	}
+    class FRAbsLoop extends AbsLoop {
+
+        AFR_FSDKVersion version = new AFR_FSDKVersion();
+        AFR_FSDKEngine engine = new AFR_FSDKEngine();
+        AFR_FSDKFace ft_result = new AFR_FSDKFace();
+        List<FaceDB.FaceRegist> mResgist = ((MyApplication) DetecterActivity.this.
+                getApplicationContext()).mFaceDB.mRegister;
+
+        @Override
+        public void setup() {
+            AFR_FSDKError error = engine.AFR_FSDK_InitialEngine(FaceDB.APP_ID, FaceDB.FR_KEY);
+            Log.d(TAG, "AFR_FSDK_InitialEngine = " + error.getCode());
+            error = engine.AFR_FSDK_GetVersion(version);
+            Log.d(TAG, "FR=" + version.toString() + "," + error.getCode()); //(210, 178 - 478, 446), degree = 1　780, 2208 - 1942, 3370
+        }
+
+        @Override
+        public void loop() {
+            if (mImageNV21 != null && mAFT_FSDKFace!=null) {
+                AFR_FSDKError error = engine.AFR_FSDK_ExtractFRFeature(mImageNV21, mWidth, mHeight, AFR_FSDKEngine.CP_PAF_NV21, mAFT_FSDKFace.getRect(), mAFT_FSDKFace.getDegree(), ft_result);
+                Log.d(TAG, "Face=" + ft_result.getFeatureData()[0] + "," + ft_result.getFeatureData()[1] + "," + ft_result.getFeatureData()[2] + "," + error.getCode());
+                AFR_FSDKMatching score = new AFR_FSDKMatching();
+                float max = 0.0f;
+                String name = null;
+                for (FaceDB.FaceRegist fr : mResgist) {
+                    for (AFR_FSDKFace face : fr.mFaceList) {
+                        error = engine.AFR_FSDK_FacePairMatching(ft_result, face, score);
+                        Log.d(TAG, "Score:" + score.getScore() + ", AFR_FSDK_FacePairMatching=" + error.getCode());
+                        if (max < score.getScore()) {
+                            max = score.getScore();
+                            name = fr.mName;
+                        }
+                    }
+                }
+
+                //crop
+                byte[] data = mImageNV21;
+                YuvImage yuv = new YuvImage(data, ImageFormat.NV21, mWidth, mHeight, null);
+                ExtByteArrayOutputStream ops = new ExtByteArrayOutputStream();
+                yuv.compressToJpeg(mAFT_FSDKFace.getRect(), 80, ops);
+                final Bitmap bmp = BitmapFactory.decodeByteArray(ops.getByteArray(), 0, ops.getByteArray().length);
+                try {
+                    ops.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if (max > 0.6f) {
+                    //fr success.
+                    final float max_score = max;
+                    Log.d(TAG, "fit Score:" + max + ", NAME:" + name);
+                    final String mNameShow = name;
+                    mHandler.removeCallbacks(hide);
+                    mHandler.post(new Runnable() {
+                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+                        @Override
+                        public void run() {
+
+//                            mTextView.setAlpha(1.0f);
+//                            mTextView.setText(mNameShow);
+//                            mTextView.setTextColor(Color.RED);
+                            mTextView.setVisibility(View.VISIBLE);
+                            mTextView.setText("置信度：" + (float) ((int) (max_score * 1000)) / 1000.0);
+                            mTextView.setTextColor(Color.RED);
+
+
+//							int orientation = setCameraDisplayOrientation(DetecterActivity.this, mCameraId, mCamera);
+                            int orientation = setCameraDisplayOrientation(DetecterActivity.this, 1, mCamera);
+
+
+                            Log.d("zsn", "orientation==" + orientation);
+                            if (DetecterActivity.this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                //竖屏
+                                mImageView.setRotation(orientation + 180);
+                            } else {
+                                //横屏
+                                mImageView.setRotation(orientation);
+                            }
+                            //mImageView.setRotation(-90);
+                            mImageView.setImageAlpha(255);
+                            mImageView.setImageBitmap(bmp);
+                        }
+                    });
+                } else {
+                    final String mNameShow = "未识别";
+                    DetecterActivity.this.runOnUiThread(new Runnable() {
+                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+                        @Override
+                        public void run() {
+//                            mTextView.setAlpha(1.0f);
+                            mTextView.setVisibility(View.INVISIBLE);
+//                            mTextView.setText(mNameShow);
+//                            mTextView.setTextColor(Color.RED);
+                            mImageView.setImageAlpha(255);
+                            int orientation = setCameraDisplayOrientation(DetecterActivity.this, 1, mCamera);
+                            Log.d("zsn", "orientation==" + orientation);
+                            if (DetecterActivity.this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                //竖屏
+                                mImageView.setRotation(orientation + 180);
+                            } else {
+                                //横屏
+                                mImageView.setRotation(orientation);
+                            }
+                            //mImageView.setRotation(-90);
+                            mImageView.setImageBitmap(bmp);
+                        }
+                    });
+                }
+                mImageNV21 = null;
+            }
+
+        }
+
+        @Override
+        public void over() {
+            AFR_FSDKError error = engine.AFR_FSDK_UninitialEngine();
+            Log.d(TAG, "AFR_FSDK_UninitialEngine : " + error.getCode());
+        }
+    }
 
 
     class AgeAndGenderAbsLoop extends Thread {
@@ -276,6 +275,7 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
     private TextView mFaceNum;  //检测到的人数
     private TextView mGender;   //性别
     private TextView mAge;      //年龄
+    private TextView mTextView; //置信度
     private ImageView mImageView;
 
 
@@ -315,6 +315,10 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
         mAge.setText("");
         mAge.setTextColor(Color.RED);
 
+        mTextView = (TextView) findViewById(R.id.textView3);
+        mTextView.setText("");
+        mTextView.setTextColor(Color.RED);
+
         mImageView = (ImageView) findViewById(R.id.imageView);
 
         mHandler = new Handler();
@@ -322,20 +326,18 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
         mHeight = 768;
         mFormat = ImageFormat.NV21;
 
-		AFT_FSDKError err = engine.AFT_FSDK_InitialFaceEngine(FaceDB.APP_ID, FaceDB.FT_KEY, AFT_FSDKEngine.AFT_OPF_0_HIGHER_EXT, 16, 5);
-		Log.d(TAG, "AFT_FSDK_InitialFaceEngine =" + err.getCode());
-		err = engine.AFT_FSDK_GetVersion(version);
-		Log.d(TAG, "AFT_FSDK_GetVersion:" + version.toString() + "," + err.getCode());
-
-		mFRAbsLoop = new FRAbsLoop();
-		mFRAbsLoop.start();
+        AFT_FSDKError err = engine.AFT_FSDK_InitialFaceEngine(FaceDB.APP_ID, FaceDB.FT_KEY, AFT_FSDKEngine.AFT_OPF_0_HIGHER_EXT, 16, 5);
+        Log.d(TAG, "AFT_FSDK_InitialFaceEngine =" + err.getCode());
+        err = engine.AFT_FSDK_GetVersion(version);
+        Log.d(TAG, "AFT_FSDK_GetVersion:" + version.toString() + "," + err.getCode());
 
         faceDetect = new FaceDetect();
 
         mAgeAndGenderAbsLoop = new AgeAndGenderAbsLoop();
         mAgeAndGenderAbsLoop.start();
 
-
+        mFRAbsLoop = new FRAbsLoop();
+        mFRAbsLoop.start();
     }
 
 
@@ -371,14 +373,14 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
             Camera.Parameters parameters = mCamera.getParameters();
             parameters.setPreviewSize(mWidth, mHeight);
             parameters.setPreviewFormat(mFormat);
-            Log.e(TAG, "setupCamera: "+mWidth+ "    |    "+ mHeight + "   |   " + mFormat);
+            Log.e(TAG, "setupCamera: " + mWidth + "    |    " + mHeight + "   |   " + mFormat);
             try {
                 mCamera.setParameters(parameters);
             } catch (Exception e) {
                 //非常罕见的情况
                 //个别机型在SupportPreviewSizes里汇报了支持某种预览尺寸，但实际是不支持的，设置进去就会抛出RuntimeException.
                 e.printStackTrace();
-                Log.e(TAG, "setupCamera: 不支持某种预览尺寸" );
+                Log.e(TAG, "setupCamera: 不支持某种预览尺寸");
                 try {
                     //遇到上面所说的情况，只能设置一个最小的预览尺寸
                     parameters.setPreviewSize(1024, 768);
@@ -387,7 +389,7 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
                 } catch (Exception e1) {
                     //到这里还有问题，就是拍照尺寸的锅了，同样只能设置一个最小的拍照尺寸
                     e1.printStackTrace();
-                    Log.e(TAG, "setupCamera: 拍照尺寸不支持" );
+                    Log.e(TAG, "setupCamera: 拍照尺寸不支持");
                     try {
                         parameters.setPictureSize(1024, 768);
                         mCamera.setParameters(parameters);
@@ -396,7 +398,6 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
                     }
                 }
             }
-
 
 
             //获取摄像头支持的各种分辨率
@@ -489,7 +490,6 @@ public class DetecterActivity extends Activity implements CameraSurfaceView.OnCa
     @Override
     public boolean startPreviewLater() {
         // TODO Auto-generated method stub
-
 
 
         return false;
