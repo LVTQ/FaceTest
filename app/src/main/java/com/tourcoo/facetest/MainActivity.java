@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                 converter.destroy();
 
                 detect.ft_process(formatData,bitmap.getWidth(),bitmap.getHeight());
-                detect.releaseEngine();
+                detect.releaseAge_Gender_Engine();
                 // 保存图片到sd卡中
                 saveToSDCard(data);
 

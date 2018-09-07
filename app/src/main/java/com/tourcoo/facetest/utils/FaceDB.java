@@ -148,7 +148,7 @@ public class FaceDB {
         return false;
     }
 
-    public void addFace(String name, AFR_FSDKFace face) {
+    public boolean addFace(String name, AFR_FSDKFace face) {
         try {
             //check if already registered.
             boolean add = true;
@@ -182,10 +182,13 @@ public class FaceDB {
                 bos.close();
                 fs.close();
             }
+            return true;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
